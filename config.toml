@@ -1,0 +1,5 @@
+[[customizations.user]]
+name = "jkastnin"
+password = ""
+key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKbQpgGkIMYRG8XpXPO8n30QTnOcqBokrh8jZBMIramf jkastnin@jkastnin.remote.csb"
+groups = ["wheel"]
