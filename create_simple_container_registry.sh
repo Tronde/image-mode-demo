@@ -48,7 +48,7 @@ EOF
 ## Main
 # Check for required packages
 for package in ${packages[*]}; do
-	if ! dnf list --installed | grep -q ${package}; then
+	if ! rpm --quiet -q ${package}; then
 		dnf -y install ${package}
 	fi
 done
