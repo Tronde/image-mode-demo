@@ -89,7 +89,7 @@ firewall-cmd --reload
 echo "Check whether ${HOSTNAME} is in trust list"
 trust list | grep -i ${HOSTNAME}
 echo "Verify access to registry"
-echo "# curl -k https://${hostname}:5000/v2/_catalog"
+echo "# curl -k https://${HOSTNAME}:5000/v2/_catalog"
 echo '{"repositories":[]}'
 echo ""
 echo "# openssl s_client -connect ${HOSTNAME}:5000 -servername ${HOSTNAME}"
