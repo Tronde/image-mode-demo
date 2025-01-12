@@ -42,7 +42,7 @@ CN = ${HOSTNAME}
 [v3_req]
 keyUsage = critical, keyEncipherment
 extendedKeyUsage = serverAuth
-subjectAltName = ${HOSTNAME}
+subjectAltName = DNS:${HOSTNAME}
 EOF
 
 ## Main
