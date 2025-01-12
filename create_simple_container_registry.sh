@@ -15,15 +15,8 @@ set -e					# Exit immediatley if any command has a non-zero exit status
 set -u					# Fail when referencing a variable that has not been defined
 set -o pipefail	# Fail if any command in a pipeline fails
 
-## Variables
-
-packages=(container-tools httpd-tools)
-reg_base_dir="/opt/registry"
-reg_auth_dir=auth
-reg_certs_dir=certs
-reg_data_dir=data
-registry_user=registryuser
-registry_pass=registrypass
+## Source registry variables
+source registry.vars
 
 cat <<EOF >/tmp/req.cnf
 [req]
@@ -63,18 +56,17 @@ htpasswd -bBc ${reg_base_dir}/${reg_auth_dir}/htpasswd \
 
 # Generate the TLS key pair
 openssl req -newkey rsa:4096 -nodes -sha256 \
-	-keyout ${reg_base_dir}/${reg_certs_dir}/domain.key -x509 -days 365 \
-	-out ${reg_base_dir}/${reg_certs_dir}/domain.crt \
+	-keyout ${reg_base_dir}/${reg_certs_dir}/${cert_domain}.key -x509 -days 365 \
+	-out ${reg_base_dir}/${reg_certs_dir}/${cert_domain}.crt \
 	-config /tmp/req.cnf
 
-if ! [ -f /etc/pki/ca-trust/source/anchors/domain.crt ]; then
-	cp ${reg_base_dir}/${reg_certs_dir}/domain.crt /etc/pki/ca-trust/source/anchors/
+if ! [ -f /etc/pki/ca-trust/source/anchors/${cert_domain}.crt ]; then
+	cp ${reg_base_dir}/${reg_certs_dir}/${cert_domain}.crt /etc/pki/ca-trust/source/anchors/
 	update-ca-trust
-	trust list | grep -i ${HOSTNAME}
 fi
 
 # Start the registry
-podman run --name myregistry \
+podman run --name ${registry_name} \
 	-p 5000:5000 \
 	-v ${reg_base_dir}/${reg_data_dir}:/var/lib/registry:z \
 	-v ${reg_base_dir}/${reg_auth_dir}:/auth:z \
@@ -82,8 +74,8 @@ podman run --name myregistry \
 	-e "REGISTRY_AUTH_HTPASSWD_REALM=Registry Realm" \
 	-e "REGISTRY_AUTH_HTPASSWD_PATH=/auth/htpasswd" \
 	-v ${reg_base_dir}/${reg_certs_dir}:/certs:z \
-	-e "REGISTRY_HTTP_TLS_CERTIFICATE=/certs/domain.crt" \
-	-e "REGISTRY_HTTP_TLS_KEY=/certs/domain.key" \
+	-e "REGISTRY_HTTP_TLS_CERTIFICATE=/certs/${cert_domain}.crt" \
+	-e "REGISTRY_HTTP_TLS_KEY=/certs/${cert_domain}.key" \
 	-e REGISTRY_COMPATIBILITY_SCHEMA1_ENABLED=true \
 	-d \
 	docker.io/library/registry:latest
@@ -94,8 +86,10 @@ firewall-cmd --add-port=5000/tcp --zone=public --permanent
 firewall-cmd --reload
 
 # Print verify info ot STDOUT
+echo "Check whether ${HOSTNAME} is in trust list"
+trust list | grep -i ${HOSTNAME}
 echo "Verify access to registry"
-echo '# curl https://hostname:5000/v2/_catalog'
+echo "# curl -k https://${hostname}:5000/v2/_catalog"
 echo '{"repositories":[]}'
 echo ""
-echo '# openssl s_client -connect <servername>:5000 -servername <servername>'
+echo "# openssl s_client -connect ${HOSTNAME}:5000 -servername ${HOSTNAME}"
