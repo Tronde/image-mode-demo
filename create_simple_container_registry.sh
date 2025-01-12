@@ -57,7 +57,7 @@ done
 mkdir -p ${reg_base_dir}/{${reg_auth_dir},${reg_certs_dir},${reg_data_dir}}
 
 # Generate credentials for accessing the registry
-htpasswd -bBc ${reg_base_dir}/{${reg_auth_dir}/htpasswd \
+htpasswd -bBc ${reg_base_dir}/${reg_auth_dir}/htpasswd \
 	${registry_user} \
 	${registry_pass}
 
@@ -67,7 +67,7 @@ openssl req -newkey rsa:4096 -nodes -sha256 \
 	-out ${reg_base_dir}/${reg_certs_dir}/domain.crt \
 	-config /tmp/req.cnf
 
-if ! -f /etc/pki/ca-trust/source/anchors/domain.crt; then
+if ! [ -f /etc/pki/ca-trust/source/anchors/domain.crt ]; then
 	cp ${reg_base_dir}/${reg_certs_dir}/domain.crt /etc/pki/ca-trust/source/anchors/
 	update-ca-trust
 	trust list | grep -i ${HOSTNAME}
