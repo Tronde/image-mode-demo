@@ -23,3 +23,8 @@ podman rm ${registry_name}
 podman rmi registry:latest
 rm /etc/pki/ca-trust/source/anchors/${cert_domain}.crt
 update-ca-trust
+
+# Configure the firewall
+firewall-cmd --remove-port=5000/tcp --zone=internal --permanent
+firewall-cmd --remove-port=5000/tcp --zone=public --permanent
+firewall-cmd --reload
