@@ -65,6 +65,13 @@ if ! [ -f /etc/pki/ca-trust/source/anchors/${cert_domain}.crt ]; then
 	update-ca-trust
 fi
 
+# Allow insecure connections to the registry
+cat << EOF > /etc/containers/registries.conf.d/001-labregistry.conf
+[[registry]]
+location="${HOSTNAME}:5000"
+insecure=true
+EOF
+
 # Start the registry
 podman run --name ${registry_name} \
 	-p 5000:5000 \
