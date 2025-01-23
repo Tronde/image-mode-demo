@@ -7,9 +7,11 @@ RUN dnf -y install httpd \
     chrony \
     vim-enhanced \
     man-pages \
+    man-db \
     strace \
     lsof \
     tcpdump \
     bash-completion && \
     dnf clean all
+RUN mandb
 RUN systemctl enable httpd sshd
