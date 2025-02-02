@@ -22,8 +22,8 @@ for package in ${packages[*]}; do
 	fi
 done
 
-# Create folder for the registry
-mkdir -p ${reg_base_dir}/${reg_data_dir}
+# Create podman volume for the registry
+podman volume create ${reg_volume_name}
 
 # Allow insecure connections to the registry
 cat << EOF > /etc/containers/registries.conf.d/002-http-registry.conf
@@ -35,7 +35,7 @@ EOF
 # Start the registry
 podman run --name ${registry_name} \
 	-p 5000:5000 \
-	-v ${reg_base_dir}/${reg_data_dir}:/var/lib/registry:z \
+	-v ${reg_volume_name}:/var/lib/registry:z \
 	-e REGISTRY_COMPATIBILITY_SCHEMA1_ENABLED=true \
 	-d \
 	docker.io/library/registry:latest

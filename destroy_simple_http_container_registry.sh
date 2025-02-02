@@ -21,6 +21,7 @@ source registry.vars
 podman stop ${registry_name}
 podman rm ${registry_name}
 podman rmi registry:latest
+podman volume rm ${reg_volume_name}
 rm /etc/containers/registries.conf.d/002-http-registry.conf
 
 # Configure the firewall
