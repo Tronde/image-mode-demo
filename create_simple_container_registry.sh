@@ -88,11 +88,9 @@ podman run --name ${registry_name} \
 	docker.io/library/registry:latest
 
 # Configure the firewall
-echo ""
-echo "Password for sudo is necessary to create firewall rules"
-sudo firewall-cmd --add-port=5000/tcp --zone=internal --permanent
-sudo firewall-cmd --add-port=5000/tcp --zone=public --permanent
-sudo firewall-cmd --reload
+firewall-cmd --add-port=5000/tcp --zone=internal --permanent
+firewall-cmd --add-port=5000/tcp --zone=public --permanent
+firewall-cmd --reload
 
 # Print verify info ot STDOUT
 echo "Check whether ${HOSTNAME} is in trust list"
