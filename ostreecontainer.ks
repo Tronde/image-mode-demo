@@ -17,17 +17,13 @@ reqpart --add-boot
 part / --grow --fstype xfs
 EOF
 
-cat <<EOF >> /etc/hosts
-192.168.122.207 t14-podman-1
-EOF
-
 # Configuring a pull secret
 # Source: https://docs.fedoraproject.org/en-US/bootc/bare-metal/#_accessing_registries
 mkdir -p /etc/ostree
 cat <<EOF > /etc/ostree/auth.json
 {
   "auths": {
-    "t14-podman-1:5000": {
+    "podman.example.com:5000": {
       "auth": "cmVnaXN0cnl1c2VyOnJlZ2lzdHJ5cGFzcw=="
     }
   }
@@ -38,7 +34,7 @@ EOF
 mkdir -p /etc/containers/registries.conf.d/
 cat <<EOF > /etc/containers/registries.conf.d/001-local-registry.conf
 [[registry]]
-location="t14-podman-1:5000"
+location="podman.example.com:5000"
 insecure=true
 EOF
 %end
@@ -47,19 +43,18 @@ EOF
 
 # Reference the container image to install - The kickstart
 # has no %packages section. A container image is being installed.
-ostreecontainer --url t14-podman-1:5000/rhel9.5-bootc:deploy
+ostreecontainer --url podman.example.com:5000/rhel9.5-bootc:deploy
 
 # Enable firewall only when firewalld is installed in bootc image
-firewall --enabled --ssh
-services --enabled=sshd
+firewall --enabled --ssh --http --service=https
 selinux --enforcing
 skipx
 syspurpose --role="Red Hat Enterprise Linux Server" --sla="Self-Support" --usage="Development/Test"
 
 # Only inject a SSH key for root
 rootpw --lock
-user --name jkastnin --password redhat --plaintext --groups wheel
+user --name jkastnin --password changeme --plaintext --groups wheel
 sshkey --username jkastnin "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDwIaHUWaUCYxSb3Fxjk3SYe0V/jB5Uis+0P0AG6gWcr joerg.kastning@my-it-brain.de"
-user --name ansible-user --password redhat --plaintext --groups wheel --homedir=/home/remote-ansible
+user --name ansible-user --password changeme --plaintext --groups wheel --homedir=/home/remote-ansible
 sshkey --username ansible-user "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDwIaHUWaUCYxSb3Fxjk3SYe0V/jB5Uis+0P0AG6gWcr joerg.kastning@my-it-brain.de"
 reboot --eject

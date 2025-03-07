@@ -12,7 +12,5 @@ RUN dnf -y install httpd \
     bash-completion && \
     dnf clean all
 RUN mandb
-RUN firewall-cmd \
-    --add-service http \
-    --add-service https
 RUN systemctl enable httpd sshd firewalld
+RUN bootc container lint
